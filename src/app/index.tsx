@@ -1,98 +1,231 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { vehiculos } from '@/constants/vehiculos';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+const recomendados = vehiculos.slice(0, 2);
+
+function OpcionMenu({ titulo, onPress }: { titulo: string; onPress: () => void }) {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <Pressable style={styles.opcion} onPress={onPress}>
+      <Text style={styles.opcionTitulo} numberOfLines={2} adjustsFontSizeToFit>
+        {titulo}
+      </Text>
+    </Pressable>
   );
 }
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.pantalla}>
+      <StatusBar style="dark" />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.contenido}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.logo}>AutoSport</Text>
+          <Text style={styles.titulo}>Venta de autos deportivos</Text>
+          <Text style={styles.descripcion}>
+            Encuentra deportivos de alto rendimiento, revisa su detalle y
+            confirma tu compra desde el celular.
+          </Text>
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        <Text style={styles.seccionTitulo}>Explorar AutoSport</Text>
+        <ScrollView
+          horizontal
+          style={styles.opcionesScroll}
+          contentContainerStyle={styles.opcionesGrid}
+          showsHorizontalScrollIndicator={false}
+          nestedScrollEnabled
+        >
+          <OpcionMenu titulo="Catalogo" onPress={() => router.push('/menu')} />
+          <OpcionMenu titulo="Formulario" onPress={() => router.push('/formulario')} />
+          <OpcionMenu titulo="Galeria" onPress={() => router.push('/imagenes')} />
+          <OpcionMenu titulo="Contacto" onPress={() => router.push('/contacto')} />
+        </ScrollView>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <Text style={styles.seccionTitulo}>Recomendados</Text>
+
+        {recomendados.map((vehiculo) => (
+          <View key={vehiculo.id} style={styles.tarjeta}>
+            <Image
+              source={vehiculo.imagenLocal ?? { uri: vehiculo.imagen }}
+              style={styles.imagen}
+              resizeMode="cover"
+            />
+            <View style={styles.infoTarjeta}>
+              <Text style={styles.productoTitulo}>{vehiculo.marca}</Text>
+              <Text style={styles.productoDescripcion}>{vehiculo.modelo}</Text>
+              <Text style={styles.precio}>{vehiculo.precio}</Text>
+            </View>
+          </View>
+        ))}
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.boton,
+            pressed && styles.botonPresionado,
+          ]}
+          onPress={() => router.push('/menu')}
+        >
+          <Text style={styles.botonTexto}>Ver catalogo completo</Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.botonSecundario,
+            pressed && styles.botonPresionado,
+          ]}
+          onPress={() => router.push('/contacto')}
+        >
+          <Text style={styles.botonSecundarioTexto}>Contacto</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  pantalla: {
+    backgroundColor: '#eef2f6',
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
+  scroll: {
+    backgroundColor: '#eef2f6',
     flex: 1,
-    paddingHorizontal: Spacing.four,
+  },
+  contenido: {
+    padding: 22,
+    paddingBottom: 42,
+  },
+  header: {
+    marginBottom: 26,
+    marginTop: 18,
+  },
+  opcionesScroll: {
+    marginBottom: 22,
+  },
+  opcionesGrid: {
+    gap: 8,
+    paddingRight: 12,
+  },
+  opcion: {
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
+    aspectRatio: 1,
+    backgroundColor: '#ffffff',
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 112,
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    padding: 6,
+    width: 112,
   },
-  title: {
+  opcionTitulo: {
+    color: '#121826',
+    fontSize: 13,
+    fontWeight: '800',
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+  logo: {
+    color: '#dc2626',
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 0,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  titulo: {
+    color: '#121826',
+    fontSize: 32,
+    fontWeight: '900',
+    marginTop: 6,
+  },
+  descripcion: {
+    color: '#536173',
+    fontSize: 16,
+    lineHeight: 23,
+    marginTop: 10,
+  },
+  seccionTitulo: {
+    color: '#121826',
+    fontSize: 21,
+    fontWeight: '900',
+    marginBottom: 14,
+  },
+  tarjeta: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    elevation: 3,
+    marginBottom: 16,
+    overflow: 'hidden',
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+  },
+  imagen: {
+    backgroundColor: '#d9e0ea',
+    height: 170,
+    width: '100%',
+  },
+  infoTarjeta: {
+    padding: 16,
+  },
+  productoTitulo: {
+    color: '#0f172a',
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  productoDescripcion: {
+    color: '#5b6677',
+    fontSize: 14,
+    marginTop: 5,
+  },
+  precio: {
+    color: '#111827',
+    fontSize: 17,
+    fontWeight: '900',
+    marginTop: 10,
+  },
+  boton: {
+    alignItems: 'center',
+    backgroundColor: '#dc2626',
+    borderRadius: 8,
+    marginTop: 14,
+    paddingVertical: 16,
+  },
+  botonPresionado: {
+    opacity: 0.76,
+  },
+  botonTexto: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  botonSecundario: {
+    alignItems: 'center',
+    borderColor: '#dc2626',
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 12,
+    paddingVertical: 16,
+  },
+  botonSecundarioTexto: {
+    color: '#dc2626',
+    fontSize: 16,
+    fontWeight: '900',
   },
 });
